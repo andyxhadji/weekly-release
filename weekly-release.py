@@ -2,16 +2,18 @@ from datetime import date
 
 from utils import get_week, get_quarter, get_year
 from trello_manager import TrelloManager
+from google_sheet_manager import GoogleSheetManager
 
 def main():
     tm = TrelloManager()
-    rm = ReleaseManager(trello_manager=tm, sheet_manager=None)
+    sm = GoogleSheetManager()
+    rm = ReleaseManager(trello_manager=tm, sheet_manager=sm)
 
     today = date.today()
     rm.release(week=get_week(today),
                quarter=get_quarter(today),
                year=get_year(today),
-               dry_run=True,
+               dry_run=False,
                )
 
 
@@ -25,14 +27,9 @@ class ReleaseManager:
         print("=== Starting Release ({}Q{} W{}) ===".format(year, quarter, week))
         print("=== Release Trello ===")
         self.trello_manager.release(week=week, quarter=quarter, year=year, dry_run=dry_run)
+        print("=== Release Weekly Planner ===")
+        self.sheet_manager.release(week=week, quarter=quarter, year=year, dry_run=dry_run)
         print("=== Release Complete ===")
 
-
-class GoogleSheetManager:
-    def __init__(self):
-        print('test')
-
-    def release_sheet(self):
-        print('test')
 
 main()

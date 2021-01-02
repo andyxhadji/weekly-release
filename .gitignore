@@ -1,3 +1,7 @@
 env/*
 .idea/*
 config.json
+.DS_Store
+token.pickle
+google_credentials.json
+__pycache__/*
