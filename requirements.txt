@@ -20,4 +20,4 @@ rsa==4.6
 six==1.15.0
 trello==0.9.1
 uritemplate==3.0.1
-urllib3==1.24.1
+urllib3==1.24.2
