@@ -78,6 +78,6 @@ class GoogleSheetManager:
 
             new_sheet_id = response['sheetId']
         today = date.today()
-        new_title = "Q{}W{}".format(get_quarter(today), get_week(today))
+        new_title = "Q{}W{}".format(get_quarter(today), get_week(today) + 1)
         print('==> Rename New Sheet')
         self.rename_worksheet(self.PLANNER_SPREADSHEET_ID, new_sheet_id, new_title, dry_run=dry_run)
