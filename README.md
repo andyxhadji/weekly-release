@@ -1,5 +1,5 @@
-To build a new version of andyxhadji/hub
-========================================
+To build a new andyxhadji/hub image
+===================================
 
 ```
 docker build . -t andyxhadji/hub
