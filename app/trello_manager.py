@@ -6,7 +6,7 @@ from datetime import date
 import requests
 import json
 
-from utils import get_week, get_quarter, get_year
+from .utils import get_week, get_quarter, get_year
 
 
 class TrelloManager:
@@ -15,7 +15,7 @@ class TrelloManager:
     WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
     def __init__(self):
-        with open('config.json') as json_data_file:
+        with open('./app/config.json') as json_data_file:
             config_data = json.load(json_data_file)
             self._trello_key = config_data["trello_key"]
             self._trello_token = config_data["trello_token"]
@@ -45,7 +45,9 @@ class TrelloManager:
         print('==> Create List: {}'.format(list_name))
         new_archive = self._dryrun_list
         if not dry_run:
+            print("~ create list ~")
             new_archive = self.client.lists.new(list_name, self.board_id)
+            print(" ~ done ~")
         return new_archive
 
 
