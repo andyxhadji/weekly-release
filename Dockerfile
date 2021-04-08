@@ -2,30 +2,45 @@ FROM python:3.6-slim
 
 RUN apt-get update; apt-get install -y curl
 
-RUN pip install fastapi uvicorn
+RUN apt-get install gcc -y
 
-#RUN pip install --upgrade pip
+RUN apt-get install build-essential libssl-dev libffi-dev python-dev -y
 
-#RUN pip install --default-timeout=100 cryptography==2.1.0
+ENV PYTHONUNBUFFERED=1 \
+    # prevents python creating .pyc files
+    PYTHONDONTWRITEBYTECODE=1 \
+    \
+    # pip
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100 \
+    \
+    # poetry
+    # https://python-poetry.org/docs/configuration/#using-environment-variables
+    POETRY_VERSION=1.0.3 \
+    # make poetry install to this location
+    POETRY_HOME="/opt/poetry" \
+    # make poetry create the virtual environment in the project's root
+    # it gets named `.venv`
+    #POETRY_VIRTUALENVS_IN_PROJECT=true \
+    # do not ask any interactive question
+    POETRY_NO_INTERACTION=1 \
+    # paths
+    # this is where our requirements + virtual environment will live
+    PYSETUP_PATH="./app/" \
+    VENV_PATH="/opt/pysetup/.venv"
 
-#RUN pip install --default-timeout=100 requests[security]==2.25.0
-
-#COPY ./app/requirements.txt /app/requirements.txt
-
-#RUN pip install --default-timeout=100 -r /app/requirements.txt
-ENV PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
-
+# prepend poetry and venv to path
+ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
 # Install Poetry
-#RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | POETRY_HOME=/opt/poetry python && \
-#    cd /usr/local/bin && \
-#    ln -s /opt/poetry/bin/poetry && \
-#    poetry config virtualenvs.create false
+RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
-# Copy using poetry.lock* in case it doesn't exist yet
-COPY ./app/app.toml ./app/poetry.lock* /app/
+RUN poetry config virtualenvs.create false
 
-#RUN poetry install --no-root --no-dev
+COPY ./app/pyproject.toml ./app/poetry.lock* /
+
+RUN poetry install --no-dev
 
 EXPOSE 80
 
@@ -35,6 +50,6 @@ COPY google_credentials.json /app/google_credentials.json
 
 COPY config.json /app/config.json
 
-#RUN sed -i "s|from urllib import quote_plus|from urllib.parse import quote_plus |g" /usr/local/lib/python3.6/site-packages/trello/__init__.py
+RUN sed -i "s|from urllib import quote_plus|from urllib.parse import quote_plus |g" /usr/local/lib/python3.6/site-packages/trello/__init__.py
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
