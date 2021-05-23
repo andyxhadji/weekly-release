@@ -52,4 +52,4 @@ COPY config.json /app/config.json
 
 RUN sed -i "s|from urllib import quote_plus|from urllib.parse import quote_plus |g" /usr/local/lib/python3.6/site-packages/trello/__init__.py
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--timeout-keep-alive", "60"]

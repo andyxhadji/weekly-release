@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.requests import Request
 
 from datetime import date
+from time import sleep
 
 from .utils import get_week, get_quarter, get_year
 from .trello_manager import TrelloManager

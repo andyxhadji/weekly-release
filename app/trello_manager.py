@@ -6,7 +6,7 @@ from datetime import date
 import requests
 import json
 
-from .utils import get_week, get_quarter, get_year
+from .utils import get_week, get_quarter, get_year, poll_api
 
 
 class TrelloManager:
@@ -20,7 +20,7 @@ class TrelloManager:
             self._trello_key = config_data["trello_key"]
             self._trello_token = config_data["trello_token"]
         self.client = TrelloApi(self._trello_key, token=self._trello_token)
-        self.todo_board = self.client.boards.get(self.TODO_BOARD)
+        self.todo_board = poll_api(api_function=self.client.boards.get, args=[self.TODO_BOARD])
         self.board_id = self.todo_board['id']
 
         self._dryrun_list = {'id': "dry_run_list", "name": "dry_run_list", "pos": 0}
@@ -46,13 +46,14 @@ class TrelloManager:
         new_archive = self._dryrun_list
         if not dry_run:
             print("~ create list ~")
-            new_archive = self.client.lists.new(list_name, self.board_id)
+
+            new_archive = poll_api(api_function=self.client.lists.new, args=[list_name, self.board_id])
             print(" ~ done ~")
         return new_archive
 
 
     def _get_list_by_name(self, name):
-        return [l for l in self.client.boards.get_list(self.board_id, filter="open") if l['name'] == name][0]
+        return [l for l in poll_api(api_function=self.client.boards.get_list, args=[self.board_id], kwargs={"filter": "open"}) if l['name'] == name][0]
 
 
     def _move_all_cards(self, from_list, to_list, dry_run=False):
@@ -61,7 +62,8 @@ class TrelloManager:
         url = "https://api.trello.com/1/lists/{}/moveAllCards".format(from_list['id'])
         querystring = {"idBoard": self.board_id, "idList": to_list['id'], "key": self._trello_key, "token": self._trello_token}
         if not dry_run:
-            response = requests.request("POST", url, params=querystring)
+            response = poll_api(api_function=requests.request, args=["POST", url], kwargs={"params": querystring})
+            #response = requests.request("POST", url, params=querystring)
 
 
     def _position_list(self, to_move, after_this, dry_run):
@@ -71,7 +73,8 @@ class TrelloManager:
         querystring = {"value": int(after_this['pos']) + 1, "key": self._trello_key,
                        "token": self._trello_token}
         if not dry_run:
-            response = requests.request("PUT", url, params=querystring)
+            response = poll_api(api_function=requests.request, args=["PUT", url], kwargs={"params": querystring})
+            #response = requests.request("PUT", url, params=querystring)
 
 
     def _create_weekly_cards(self, in_list, dry_run):
@@ -84,7 +87,8 @@ class TrelloManager:
         print('===> Create "{}" Card'.format(name))
         new_card = self._dryrun_card
         if not dry_run:
-            new_card = self.client.lists.new_card(in_list['id'], name)
+            new_card = poll_api(api_function=self.client.lists.new_card, args=[in_list['id'], name])
+            #new_card = self.client.lists.new_card(in_list['id'], name)
             if checklist:
                 url = "https://api.trello.com/1/checklists"
                 querystring = {"idCard": new_card['id'],
@@ -92,7 +96,8 @@ class TrelloManager:
                                "key": self._trello_key,
                                "token": self._trello_token,
                                }
-                response = requests.request("POST", url, params=querystring)
+                response = poll_api(api_function=requests.request, args=["POST", url], kwargs={"params": querystring})
+                #response = requests.request("POST", url, params=querystring)
         return new_card
 
 
